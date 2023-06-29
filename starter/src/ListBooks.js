@@ -3,34 +3,48 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import * as BooksAPI from "./BooksAPI";
 
+// reference for debouncing: https://blog.logrocket.com/how-and-when-to-debounce-or-throttle-in-react/
+// filterTimeout needs to be placed outside of the ListBooks component. If it is placed inside, then a new filterTimeout variable will be created each time ListBooks is re-rendered and the timeout will not be cleared
+let filterTimeout; 
+
 const ListBooks = ({books, onChangeShelf}) => {
     const [query, setQuery] = useState("");
     const [searchedBooks, setSearchedBooks] = useState([]);
 
     const updateQuery = (query) => {
+        clearTimeout(filterTimeout);
         setQuery(query);
         const searchBooks = async () => {
-            const res = await BooksAPI.search(query);
-            console.log(res);
-            if (res.error)
-                setSearchedBooks([]);
+            if (query.length === 0)
+            {
+              console.log("searchBooks empty"); // for debugging debouncing issue
+              setSearchedBooks([]);
+            }
             else
             {
-                const res2 = res.map(searchedBook => {
-                    books.forEach(book => {
-                        if (book.id === searchedBook.id)
-                            searchedBook.shelf = book.shelf;
-                    });
-                    return searchedBook;
-                });
-                console.log(res2);
-                setSearchedBooks(res2);
+              const res = await BooksAPI.search(query);
+              if (res.error)
+                  setSearchedBooks([]);
+              else
+              {
+                  const res2 = res.map(searchedBook => {
+                      books.forEach(book => {
+                          if (book.id === searchedBook.id)
+                              searchedBook.shelf = book.shelf;
+                      });
+                      return searchedBook;
+                  });
+                  console.log("searchBooks async " + query); // for debugging debouncing issue
+                  setSearchedBooks(res2);
+              }
             }
+
           };
 
-        if (query.length === 0)
-            setSearchedBooks([]);
-        else searchBooks();
+        // for debouncing
+        filterTimeout = setTimeout(() => {
+          searchBooks();
+        }, 300);
     };
 
     return (

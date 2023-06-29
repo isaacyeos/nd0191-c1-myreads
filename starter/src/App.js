@@ -13,8 +13,8 @@ function App() {
   useEffect(() => {
     const getBooks = async () => {
       const res = await BooksAPI.getAll();
-      console.log(res);
-      console.log("getAll() called");
+      // console.log(res);
+      // console.log("getAll() called");
       setBooks(res);
     };
 
@@ -25,14 +25,14 @@ function App() {
     // https://javascript.info/async-await
     const updateBook = async () => {
       const res = await BooksAPI.update(book, shelf);
-      console.log(res);
-      console.log("book " + book.id + " updated");
+      // console.log(res);
+      // console.log("book " + book.id + " updated");
 
       // now update state - the updateBook function suspends execution and waits for BooksAPI.update to be done before continuing
       book.shelf = shelf;
       const booksNew = books.filter(b => b.id !== book.id).concat(book);
       setBooks(booksNew);
-      console.log(booksNew);
+      // console.log(booksNew);
     };
     updateBook();
   };

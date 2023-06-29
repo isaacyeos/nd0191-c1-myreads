@@ -1,7 +1,7 @@
 import Book from "./Book";
 
 const Bookshelf = ({shelf, title, books, onChangeShelf}) => {
-    console.log("books updated");
+    // console.log("books updated");
     return (
         <div className="bookshelf">
             <h2 className="bookshelf-title">{title}</h2>
