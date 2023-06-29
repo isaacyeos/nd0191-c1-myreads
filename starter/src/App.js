@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import * as BooksAPI from "./BooksAPI";
 import Bookshelf from "./Bookshelf";
 import ListBooks from "./ListBooks";
+import { Route, Routes, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 function App() {
   const [showSearchPage, setShowSearchpage] = useState(false);
@@ -12,6 +14,7 @@ function App() {
     const getBooks = async () => {
       const res = await BooksAPI.getAll();
       console.log(res);
+      console.log("getAll() called");
       setBooks(res);
     };
 
@@ -19,25 +22,25 @@ function App() {
   }, []);  
 
   const handleChangeShelf = (book, shelf) => {
-    // console.log(book);
-    const booksNew = books.map(b => {
-      if (b.id === book.id)
-        b.shelf = shelf;
-      return b;
-    })
-    setBooks(booksNew);
+    // https://javascript.info/async-await
     const updateBook = async () => {
       const res = await BooksAPI.update(book, shelf);
       console.log(res);
+      console.log("book " + book.id + " updated");
+
+      // now update state - the updateBook function suspends execution and waits for BooksAPI.update to be done before continuing
+      book.shelf = shelf;
+      const booksNew = books.filter(b => b.id !== book.id).concat(book);
+      setBooks(booksNew);
+      console.log(booksNew);
     };
     updateBook();
   };
 
   return (
-    <div className="app">
-      {showSearchPage ? (
-        <ListBooks books={books} onChangeShelf={handleChangeShelf} />
-      ) : (
+    <Routes>
+      <Route
+        exact path="/" element={
         <div className="list-books">
           <div className="list-books-title">
             <h1>MyReads</h1>
@@ -48,11 +51,20 @@ function App() {
             <Bookshelf shelf="read" title="Read" books={books} onChangeShelf={handleChangeShelf} />
           </div>
           <div className="open-search">
-            <a onClick={() => setShowSearchpage(!showSearchPage)}>Add a book</a>
+            <Link to="/search" className="add-contact">
+              Add a book
+            </Link>
           </div>
         </div>
-      )}
-    </div>
+        }
+      />
+      <Route
+        path="/search"
+        element={
+          <ListBooks books={books} onChangeShelf={handleChangeShelf} />
+        }
+      />
+    </Routes>
   );
 }
 
